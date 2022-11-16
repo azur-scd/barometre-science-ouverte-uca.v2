@@ -1,0 +1,22 @@
+# Ignore virtual env folder#
+###################
+**/*venv*/**
+
+# Ignore archived version of notebooks and python stuffs #
+###################
+*.ipynb_checkpoints
+**/__pycache__
+
+# Ignore sqlite db
+###################
+db/**
+!db/.gitkeep
+
+# Ignore dev folders
+###################
+.devcontainer
+.vscode
+
+# Ignore batch files
+###################
+*.bat
