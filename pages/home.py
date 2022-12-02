@@ -2,8 +2,12 @@ import dash
 from dash import Dash, callback, html, dcc, dash_table, Input, Output, State, MATCH, ALL
 import dash_bootstrap_components as dbc
 from templates.ui_templates import widget_card_header
+import config
 
 dash.register_page(__name__, path='/')
+
+# config variables
+url_subpath = config.URL_SUBPATH
 
 left_jumbotron_old = dbc.Col(
     html.Div(
@@ -40,7 +44,7 @@ left_jumbotron = dbc.Col(
                 dbc.Col(widget_card_header("oa_rate_total","Taux d'accès ouvert", text="68,2 %"), width=5),
                 ]),
             #html.Hr(className="my-2"),
-            html.P(dbc.Button("Accéder", color="secondary", outline=True, href="/dashboard-publications"),className="lead text-center mt-5")
+            html.P(dbc.Button("Accéder", color="secondary", outline=True, href=f"{url_subpath}dashboard-publications"),className="lead text-center mt-5")
         ],
         className="h-100 p-5 bg-light border rounded-3",
     ),
@@ -53,16 +57,16 @@ right_jumbotron = dbc.Col(
             html.H2("Baromètre des thèses"),
             html.Hr(className="my-2"),
             html.P(
-                "Le baromètre UCA des thèses fait un état des lieux des modalités de diffusion des thèses de doctorat délivrées par Université Côte d'Azur (et anciennement l'Université de Nice Sophia Antipolis) depuis le passage au dépôt électronique depuis 2013"
+                "Le baromètre UCA des thèses présente un état des lieux des modalités de diffusion des thèses de doctorat délivrées par Université Côte d'Azur (et anciennement l'Université de Nice Sophia Antipolis) et déposées en format électronique depuis 2013"
             ),
             html.P("Il se base sur les métadonnées descriptives de Thèses.fr exposées en Open Data sur data.gouv.fr par l'Abes"),
             dbc.Row([
-                dbc.Col(widget_card_header("nb_theses","Nombre de thèses", text="X"),width={"offset": 1, "size":5}),
-                dbc.Col(widget_card_header("theses_oa_rate_total","Taux d'ouverture", text="x %"), width=5),
+                dbc.Col(widget_card_header("nb_theses","Nombre de thèses", text="2 055"),width={"offset": 1, "size":5}),
+                dbc.Col(widget_card_header("theses_oa_rate_total","Taux d'ouverture", text="74,2 %"), width=5),
                 ],
                 className="mt-5"),
             #html.Hr(className="my-2"),
-            html.P(dbc.Button("Coming soon...", color="secondary", outline=True),className="lead text-center mt-5")
+            html.P(dbc.Button("Coming soon...", color="secondary", outline=True,  href=f"{url_subpath}dashboard-theses"),className="lead text-center mt-5")
         ],
         className="h-100 p-5 bg-light border rounded-3",
     ),

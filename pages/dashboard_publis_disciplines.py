@@ -4,7 +4,7 @@ import dash
 from dash import Dash, callback, html, dcc, dash_table, Input, Output, State, MATCH, ALL
 import dash_bootstrap_components as dbc
 from templates.ui_templates import get_slider_range, widget_card_header, widget_card_chart, widget_card_chart_no_callback, get_radio_buttons_chart_order
-from templates.header_templates import get_row_widgets_header
+from templates.header_templates import get_publis_row_widgets_header
 import helpers.functions as fn
 import plotly.express as px
 import sqlalchemy as sqla
@@ -15,6 +15,7 @@ dash.register_page(__name__, path='/dashboard-publications-diciplines')
 
 # config params
 publis_last_obs_date = config.PUBLIS_LAST_OBS_DATE
+publis_period = config.PUBLIS_PERIOD
 colors = config.COLORS
 plotly_template = config.PLOTLY_TEMPLATE
 
@@ -78,16 +79,16 @@ fig_oa_rate_by_year_faceting_disc.update_traces(
 fig_oa_rate_by_year_faceting_disc.for_each_annotation(
     lambda a: a.update(text=a.text.split("=")[-1].upper()))
 
-row_widgets_header = get_row_widgets_header(df)
+row_widgets_header = get_publis_row_widgets_header(df)
 
 row_widgets = html.Div(
     [
         dbc.Row(
             [
                 dbc.Col(widget_card_chart("disc_repartition", "Répartition des publications par discipline",
-                        slider_range=get_slider_range('disc_repartition'), comment = widgets_with_comment_dict["disc-repartition"]), width=6),
+                        slider_range=get_slider_range('disc_repartition', publis_period), comment = widgets_with_comment_dict["disc-repartition"]), width=6),
                 dbc.Col(dbc.Card(html.Div(
-                    "Les disiciplines représentées sont celles retenues dans le Baromètre Science ouverte national, elles-mêmes issues des classifications des bases CNRS Pascal et Faancis. Les champs disciplinaires de déclinent comme suit : ... en cours..."), body=True,), width=6)
+                    "Les disciplines représentées sont celles retenues dans le Baromètre Science ouverte national, elles-mêmes issues des classifications des bases CNRS Pascal et Faancis. Les champs disciplinaires de déclinent comme suit : ... en cours..."), body=True,), width=6)
             ]
         ),
         html.Hr(),
@@ -101,9 +102,9 @@ row_widgets = html.Div(
         dbc.Row(
             [
                 dbc.Col(widget_card_chart("hosttype_by_disc", "Répartition des publications françaises par voie d'ouverture pour chaque discipline",
-                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_disc'], slider_range=get_slider_range('hosttype_by_disc'),  radio_buttons=get_radio_buttons_chart_order('hosttype_by_disc'), comment = widgets_with_comment_dict["hosttype-by-disc"]), width=6),
+                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_disc'], slider_range=get_slider_range('hosttype_by_disc', publis_period),  radio_buttons=get_radio_buttons_chart_order('hosttype_by_disc'), comment = widgets_with_comment_dict["hosttype-by-disc"]), width=6),
                 dbc.Col(widget_card_chart("hosttype_disc_scatter", "Positionnement des disciplines en fonction des voies privilégiées pour l'ouverture de leurs publications",
-                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_disc_scatter'], slider_range=get_slider_range('hosttype_disc_scatter'), comment = widgets_with_comment_dict["hosttype-disc-scatter"]), width=6),
+                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_disc_scatter'], slider_range=get_slider_range('hosttype_disc_scatter', publis_period), comment = widgets_with_comment_dict["hosttype-disc-scatter"]), width=6),
             ]
         ),
         html.Hr(),
@@ -140,7 +141,7 @@ for key in widgets_with_iframe_dict:
           Input("disc_repartition-year-range", "value"))
 def update_disc_radar(year_range):
     df = get_data()
-    data = fn.get_filtered_data_by_year(df, year_range)
+    data = fn.get_filtered_data_by_year(df, "year", year_range)
     d = pd.DataFrame({'disc': data["bso_classification_fr"].value_counts(
     ).index, 'count': data["bso_classification_fr"].value_counts().values})
     fig = px.line_polar(d, r='count', theta='disc',
@@ -156,7 +157,7 @@ def update_disc_radar(year_range):
 )
 def update_hosttype_rate_by_disc(year_range, chart_order):
     df = get_data()
-    data = fn.get_filtered_data_by_year(df, year_range)
+    data = fn.get_filtered_data_by_year(df, "year", year_range)
     crosstab_df = fn.get_crosstab_percent(
         data, "bso_classification_fr", "oa_host_type_normalized")
     fig = px.bar(crosstab_df, y='bso_classification_fr', x=[
@@ -186,7 +187,7 @@ def update_hosttype_rate_by_disc(year_range, chart_order):
 )
 def update_hosttype_disc_scatter(year_range):
     df = get_hosttype_exploded_data()
-    data = fn.get_filtered_data_by_year(df, year_range)
+    data = fn.get_filtered_data_by_year(df,"year", year_range)
     d = pd.DataFrame({'disc': data["bso_classification_fr"].value_counts(
     ).index, 'count': data["bso_classification_fr"].value_counts().values})
     crosstab_df = (pd.crosstab(data["bso_classification_fr"],

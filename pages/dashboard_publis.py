@@ -4,6 +4,7 @@ import dash
 from dash import Dash, callback, html, dcc, dash_table, Input, Output, State, MATCH, ALL
 import dash_bootstrap_components as dbc
 from templates.ui_templates import get_slider_range, widget_card_header, widget_card_chart, get_radio_buttons_datatype
+from templates.header_templates import get_publis_row_widgets_header
 import helpers.functions as fn
 import plotly.express as px
 import sqlalchemy as sqla
@@ -17,6 +18,7 @@ dash.register_page(__name__, path='/dashboard-publications')
 publis_last_obs_date = config.PUBLIS_LAST_OBS_DATE
 colors = config.COLORS
 publis_obs_dates = config.PUBLIS_OBS_DATES
+publis_period = config.PUBLIS_PERIOD
 line_dash_map = config.LINE_DASH_MAP
 plotly_template = config.PLOTLY_TEMPLATE
 
@@ -79,11 +81,7 @@ row_widgets_header = html.Div(
             [  # stores of data
                 html.Div(dcc.Store(id="publis_dataset")),
                 # widgets
-                dbc.Col(widget_card_header("nb_publis_total","Nombre de publications"),width={"offset": 1, "size":2}),
-                dbc.Col(widget_card_header("oa_rate_total","Taux d'accès ouvert"), width=2),
-                dbc.Col(widget_card_header("period", "Période observée", text = "2016 - 2021"),width=2),
-                dbc.Col(widget_card_header("last_obs", "Date de dernière mise à jour", text = "29 août 2022"),width=2),
-                dbc.Col(widget_card_header("source", "Source des données", text = "Scopus"),width=2),
+                html.Div(id="widgets-header"),
                 #dbc.Col(widget_card_header("nb publis", "14 500"),width=2),
             ],
             align="center"
@@ -142,7 +140,7 @@ compare_oa_form = dbc.Form(
 row_charts = html.Div(
     [   dbc.Row(
             [
-                dbc.Col([widget_card_chart("oa_rate","Taux d'accès ouvert global",slider_range=get_slider_range("oa-rate"), comment = widgets_with_comment_dict["oa-rate"])], width=4),
+                dbc.Col([widget_card_chart("oa_rate","Taux d'accès ouvert global",slider_range=get_slider_range("oa-rate", publis_period), comment = widgets_with_comment_dict["oa-rate"])], width=4),
                 dbc.Col(widget_card_chart("oa_rate_by_year","Accès ouvert par année de publication",radio_buttons=get_radio_buttons_datatype("oa-rate"), comment = widgets_with_comment_dict["oa-rate-by-year"]), width=4),
                 dbc.Col(widget_card_chart("oa_rate_by_obs_date","Taux d'accès ouvert des publications parues durant l'année précédente par année d'observation", bsonat_iframe_src=widgets_with_iframe_dict['oa_rate_by_obs_date'], comment = widgets_with_comment_dict["oa-rate-by-obs-date"]), width=4),
             ]
@@ -150,7 +148,7 @@ row_charts = html.Div(
         html.Hr(),
          dbc.Row(
             [
-                dbc.Col(widget_card_chart("oa_and_hosttype","Répartition des publications par voie d'ouverture",bsonat_iframe_src=widgets_with_iframe_dict['oa_and_hosttype'], slider_range=get_slider_range("oa-and-hosttype"), comment = widgets_with_comment_dict["oa-and-hosttype"]), width=6),
+                dbc.Col(widget_card_chart("oa_and_hosttype","Répartition des publications par voie d'ouverture",bsonat_iframe_src=widgets_with_iframe_dict['oa_and_hosttype'], slider_range=get_slider_range("oa-and-hosttype", publis_period), comment = widgets_with_comment_dict["oa-and-hosttype"]), width=6),
                 dbc.Col(widget_card_chart("hosttype_rate_by_year","Répartition des publications en accès ouvert par voie d\'ouverture et par année de publication",bsonat_iframe_src=widgets_with_iframe_dict['hosttype_rate_by_year'], comment = widgets_with_comment_dict["hosttype-rate-by-year"]), width=6),
             ]
         ),
@@ -177,7 +175,7 @@ row_charts = html.Div(
         html.Hr(),
          dbc.Row(
             [
-                dbc.Col(widget_card_chart("hosttype_by_genre","Taux d'accès ouvert et voies d'ouverture par type de publications",bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_genre'],  slider_range=get_slider_range("hosttype-by-genre")), width=6),
+                dbc.Col(widget_card_chart("hosttype_by_genre","Taux d'accès ouvert et voies d'ouverture par type de publications",bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_genre'],  slider_range=get_slider_range("hosttype-by-genre", publis_period)), width=6),
                 #dbc.Col(widget_card_chart("hosttype_rate_by_year","Répartition des publications en accès ouvert par voie d\'ouverture et par année de publication",bsonat_iframe_src=widgets_with_iframe_dict['hosttype_rate_by_year']), width=6),
             ]
         ),
@@ -218,10 +216,10 @@ def update_publis_dataset(selected_structure):
     json_publis_dataset = get_publis_dataset(publis_last_obs_date,selected_structure).to_dict(orient="records")
     return json.dumps(json_publis_dataset)
 
-########### HEADER WIDGETS CALLBACKS ################
+########### WIDGETS HEADER CALLBACKS ################
 #####################################################
 
-@callback(
+"""@callback(
     Output("nb_publis_total", "children"),
     Output("oa_rate_total", "children"),
     Input("publis_dataset", "data")
@@ -231,6 +229,15 @@ def widgets_header(publis_dataset):
     nb_publis_total = df.shape[0]
     oa_rate_total = round(int(df[df["is_oa_normalized"] == "Accès ouvert"].shape[0]) * 100 / int(nb_publis_total),1)
     return nb_publis_total,f"{oa_rate_total} %"
+    """
+
+@callback(
+    Output("widgets-header", "children"),
+    Input("publis_dataset", "data")
+)
+def widgets_header(publis_dataset):
+    df = pd.read_json(publis_dataset)
+    return get_publis_row_widgets_header(df)
 
 
 ########### CHARTS CALLBACKS ########################
@@ -244,7 +251,7 @@ def widgets_header(publis_dataset):
 )
 def update_oa_rate(publis_dataset, year_range):
     df = pd.read_json(publis_dataset)
-    data = fn.get_filtered_data_by_year(df,year_range)
+    data = fn.get_filtered_data_by_year(df,"year",year_range)
     fig = px.pie(data, names='is_oa_normalized', hole=0.7, color="is_oa_normalized", color_discrete_map= colors)
     return fig
 
@@ -304,7 +311,7 @@ def update_oa_rate_by_obs_date(selected_structure):
 )
 def update_oa_and_hosttype(publis_dataset, year_range):
     df = pd.read_json(publis_dataset)
-    data = fn.get_filtered_data_by_year(df,year_range)
+    data = fn.get_filtered_data_by_year(df,"year",year_range)
     fig = px.treemap(data, path=['is_oa_normalized', 'oa_host_type_normalized'], maxdepth=2,color='oa_host_type_normalized',color_discrete_map= colors)
     fig.update_traces(textinfo = "label+value+percent parent+percent entry")
     fig.update_layout(margin=dict(l=10, r=10, t=10, b=10))
@@ -386,7 +393,7 @@ def update_grid_oa_rate_compare(comp_last_date,comp_first_date,comp_first_oa_sta
 )
 def update_hosttype_by_genre(publis_dataset, year_range):
     df = pd.read_json(publis_dataset)
-    data = fn.get_filtered_data_by_year(df,year_range)
+    data = fn.get_filtered_data_by_year(df,"year",year_range)
     crosstab_df = fn.get_crosstab_percent(data, "genre", "oa_host_type_normalized")
     fig = px.bar(crosstab_df, x='genre', y=['Archive ouverte', 'Editeur', 'Editeur et archive ouverte'], color_discrete_map=colors, template=plotly_template)
     fig.update_xaxes(title_text='Type de publication')

@@ -1,8 +1,14 @@
 import dash
 from dash import Dash, callback, html, dcc, dash_table, Input, Output, State, MATCH, ALL
 import dash_bootstrap_components as dbc
-import config
+import dash_loading_spinners as dls
 
+
+def load_with_spinner(composant):
+    return dls.Hash(composant,
+                        color="#435278",
+                        speed_multiplier=2,
+                        size=70,)
 
 def widget_card_header(id, title, text=None):
     if text is not None:
@@ -94,7 +100,7 @@ def widget_card_chart(id, title, bsonat_iframe_src=None, slider_range=None, radi
         ]),
         dbc.CardBody(
             [
-                dcc.Graph(id=f"fig_{id}")
+                load_with_spinner(dcc.Graph(id=f"fig_{id}"))
             ]
         ),
         comment_div
@@ -145,16 +151,14 @@ def widget_card_chart_no_callback(id, fig, title, bsonat_iframe_src=None, commen
         ),
         dbc.CardBody(
             [
-                dcc.Graph(figure=fig)
+                load_with_spinner(dcc.Graph(figure=fig))
             ]
         ),
          comment_div
     ], color="light", outline=True)
     return card
 
-
-period = config.PERIOD
-def get_slider_range(div_id):
+def get_slider_range(div_id,period):
     # markers
     period_marks = {}
     keys = range(period[0], period[1], 1)

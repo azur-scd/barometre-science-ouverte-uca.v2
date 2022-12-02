@@ -6,6 +6,7 @@ import config
 # config variables
 port = config.PORT
 host = config.HOST
+url_subpath = config.URL_SUBPATH
 
 # external JavaScript f& CSS iles
 external_scripts = [
@@ -24,6 +25,7 @@ app = dash.Dash(
         {"name": "viewport", "content": "width=device-width"}],
     external_scripts=external_scripts,
     external_stylesheets=external_stylesheets,
+    url_base_pathname=url_subpath
 )
 #app.config.suppress_callback_exceptions = True
 
@@ -45,24 +47,24 @@ navbar = dbc.Navbar(
                     align="center",
                     className="g-0",
                 ),
-                href="/",
+                href=f"{url_subpath}",
                 style={"textDecoration": "none"},
             ),
             dbc.Collapse(
                 dbc.Nav(
-                    [dbc.NavItem(dbc.NavLink("Home", href="/")),
+                    [dbc.NavItem(dbc.NavLink("Home", href=f"{url_subpath}")),
                      dbc.DropdownMenu(
                         children=[
                             dbc.DropdownMenuItem("Baromètre général",
-                                                 href="/dashboard-publications"),
+                                                 href=f"{url_subpath}dashboard-publications"),
                             dbc.DropdownMenuItem(
-                                "Disciplines", href="/dashboard-publications-diciplines"),
-                            dbc.DropdownMenuItem("Editeurs", href="/dashboard-publications-editeurs"),
+                                "Disciplines", href=f"{url_subpath}dashboard-publications-diciplines"),
+                            dbc.DropdownMenuItem("Editeurs", href=f"{url_subpath}dashboard-publications-editeurs"),
                             dbc.DropdownMenuItem(divider=True),
                             dbc.DropdownMenuItem(
-                                "Données", href="/data-publications"),
+                                "Données", href=f"{url_subpath}data-publications"),
                             dbc.DropdownMenuItem(
-                                "Référentiel des strutures", href="/referentiel-structures"),
+                                "Référentiel des strutures", href=f"{url_subpath}referentiel-structures"),
                         ],
                         nav=True,
                         in_navbar=True,
@@ -71,12 +73,12 @@ navbar = dbc.Navbar(
                         dbc.DropdownMenu(
                         children=[
                             dbc.DropdownMenuItem(
-                                "Baromètre général", href="/"),
-                            dbc.DropdownMenuItem("Disciplines", href="/"),
+                                "Baromètre général", href=f"{url_subpath}dashboard-theses"),
+                            dbc.DropdownMenuItem("Disciplines", href=f"{url_subpath}"),
                             dbc.DropdownMenuItem(
-                                "Ecoles doctorales", href="/"),
+                                "Ecoles doctorales", href=f"{url_subpath}"),
                             dbc.DropdownMenuItem(divider=True),
-                            dbc.DropdownMenuItem("Données", href="/"),
+                            dbc.DropdownMenuItem("Données", href=f"{url_subpath}"),
                         ],
                         nav=True,
                         in_navbar=True,

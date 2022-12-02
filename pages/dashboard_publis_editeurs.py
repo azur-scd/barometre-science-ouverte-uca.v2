@@ -4,7 +4,7 @@ import dash
 from dash import Dash, callback, html, dcc, dash_table, Input, Output, State, MATCH, ALL
 import dash_bootstrap_components as dbc
 from templates.ui_templates import get_slider_range, widget_card_header, widget_card_chart, get_select_publisher, get_radio_buttons_chart_order
-from templates.header_templates import get_row_widgets_header
+from templates.header_templates import get_publis_row_widgets_header
 import helpers.functions as fn
 import plotly.express as px
 import sqlalchemy as sqla
@@ -16,8 +16,12 @@ dash.register_page(__name__, path='/dashboard-publications-editeurs')
 # config params
 publis_last_obs_date = config.PUBLIS_LAST_OBS_DATE
 publis_obs_dates = config.PUBLIS_OBS_DATES
+publis_period = config.PUBLIS_PERIOD
 colors = config.COLORS
 plotly_template = config.PLOTLY_TEMPLATE
+
+# Defined constants
+ALL_SELECTED_PUBLIHERS = "Tous les éditeurs"
 
 # For loop of callbacks on the bso modal url
 widgets_with_iframe_dict = {"pub_oa_rate_by_obs_date": "https://barometredelascienceouverte.esr.gouv.fr/integration/fr/publi.publishers.dynamique-ouverture.chart-taux-ouverture",
@@ -33,7 +37,7 @@ DB_PATH = PATH.joinpath("../db", "publications.db").resolve()
 dbEngine = sqla.create_engine(f'sqlite:///{DB_PATH}')
 
 def get_publis_dataset(publis_obs_date,selected_publisher):
-    if selected_publisher == "Tous les éditeurs":
+    if selected_publisher == ALL_SELECTED_PUBLIHERS:
         df = pd.read_sql(f'select doi, year, is_oa_normalized, oa_host_type_normalized, oa_status_normalized, publisher_by_doiprefix from bso_publis_uniques_{publis_obs_date}  where publisher_by_doiprefix is not NULL',dbEngine)
     else:
         df = pd.read_sql(f'select doi, year, is_oa_normalized, oa_host_type_normalized, oa_status_normalized, publisher_by_doiprefix from bso_publis_uniques_{publis_last_obs_date} where publisher_by_doiprefix = "{selected_publisher}"',dbEngine)
@@ -62,7 +66,7 @@ def get_publishers_count_data(limit=None):
     return df
 
 def get_hosttype_exploded_data():
-    df = get_publis_dataset(publis_last_obs_date,"Tous les éditeurs")
+    df = get_publis_dataset(publis_last_obs_date,ALL_SELECTED_PUBLIHERS)
     df['oa_host_type_normalized_tmp'] = df['oa_host_type_normalized'].apply(
         lambda x: ["Editeur", "Archive ouverte"] if (x == "Editeur et archive ouverte") else list(x.split(",")))
     data = df.assign(oa_host_type_normalized_explode=df['oa_host_type_normalized_tmp']).explode(
@@ -73,16 +77,16 @@ def create_json_publishers():
     df = get_publishers_count_data()
     df["value"] = df["publisher_by_doiprefix"]
     data_dict = df.rename(columns={"publisher_by_doiprefix":"label"}).drop(columns="count").to_dict(orient="records")
-    data_dict.insert(0, {'value': 'Tous les éditeurs', 'label': 'Tous les éditeurs'})
+    data_dict.insert(0, {'value': ALL_SELECTED_PUBLIHERS, 'label': ALL_SELECTED_PUBLIHERS})
     return data_dict
 
 dict_publishers = create_json_publishers()
 top25_pub_list = [s["publisher_by_doiprefix"] for s in get_publishers_count_data(limit=25).to_dict("records")]
 top10_pub_list = [s["publisher_by_doiprefix"] for s in get_publishers_count_data(limit=10).to_dict("records")]
 #top25_pub_list = [s["label"] for s in dict_publishers[1:26]]
-df = get_publis_dataset(publis_last_obs_date,"Tous les éditeurs")
+df = get_publis_dataset(publis_last_obs_date,ALL_SELECTED_PUBLIHERS)
 
-row_widgets_header = get_row_widgets_header(df)
+row_widgets_header = get_publis_row_widgets_header(df)
 
 row_widgets = html.Div([
 
@@ -91,15 +95,15 @@ row_widgets = html.Div([
                 dbc.Col(widget_card_chart("pub_oa_rate_by_obs_date", "Part des publications mises à disposition en accès ouvert par leur éditeur, par année d’observation, pour les publications parues durant l’année précédente",
                         bsonat_iframe_src=widgets_with_iframe_dict['pub_oa_rate_by_obs_date'], select_publisher=get_select_publisher('pub_oa_rate_by_obs_date', dict_publishers)), width=6),
                 dbc.Col(widget_card_chart("hosttype_by_pub", "Modalités d'ouverture des publications chez les éditeurs ou plateformes de publication les plus importants en volume (top 25)",
-                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_pub'], slider_range=get_slider_range('hosttype_by_pub'), radio_buttons=get_radio_buttons_chart_order('hosttype_by_pub')), width=6),
+                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_pub'], slider_range=get_slider_range('hosttype_by_pub', publis_period), radio_buttons=get_radio_buttons_chart_order('hosttype_by_pub')), width=6),
             ]
         ),
         dbc.Row(
             [
                 dbc.Col(widget_card_chart("pub_oa_status", "Répartition des modèles économiques pour les articles diffusés en accès ouvert par leur éditeur",
-                        bsonat_iframe_src=widgets_with_iframe_dict['pub_oa_status'], slider_range=get_slider_range('pub_oa_status'), select_publisher=get_select_publisher('pub_oa_status', dict_publishers)), width=6),
+                        bsonat_iframe_src=widgets_with_iframe_dict['pub_oa_status'], slider_range=get_slider_range('pub_oa_status', publis_period), select_publisher=get_select_publisher('pub_oa_status', dict_publishers)), width=6),
                 dbc.Col(widget_card_chart("hosttype_pub_scatter", "Positionnement des éditeurs et plateformes de publication (top 10) en fonction des voies privilégiées pour l'ouverture des publications",
-                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_pub_scatter'], slider_range=get_slider_range('hosttype_pub_scatter')), width=6),
+                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_pub_scatter'], slider_range=get_slider_range('hosttype_pub_scatter', publis_period)), width=6),
                 
             ]
         ),
@@ -152,7 +156,7 @@ def update_oa_rate_by_obs_date(selected_publisher):
     Input("hosttype_by_pub-radio-chart-order", "value")]
 )
 def update_hosttype_rate_by_pub(year_range, chart_order):
-    data = fn.get_filtered_data_by_year(df, year_range)
+    data = fn.get_filtered_data_by_year(df, "year", year_range)
     top25_data = data[data["publisher_by_doiprefix"].isin(top25_pub_list)]
     crosstab_df = fn.get_crosstab_percent(
         top25_data, "publisher_by_doiprefix", "oa_host_type_normalized")
@@ -184,7 +188,7 @@ def update_hosttype_rate_by_pub(year_range, chart_order):
 )
 def update_pub_oa_status(year_range, selected_publisher):
     df = get_publis_dataset(publis_last_obs_date,selected_publisher)
-    data = fn.get_filtered_data_by_year(df[df["is_oa_normalized"] != "Accès fermé"], year_range)    
+    data = fn.get_filtered_data_by_year(df[df["is_oa_normalized"] != "Accès fermé"], "year", year_range)    
     fig = px.treemap(data, path=['oa_status_normalized'], maxdepth=2,color='oa_status_normalized',color_discrete_map= colors)
     fig.update_traces(textinfo = "label+value+percent entry")
     fig.update_layout(margin=dict(l=10, r=10, t=10, b=10))
@@ -197,7 +201,7 @@ def update_pub_oa_status(year_range, selected_publisher):
 )
 def update_hosttype_pub_scatter(year_range):
     df = get_hosttype_exploded_data()
-    data = fn.get_filtered_data_by_year(df, year_range)
+    data = fn.get_filtered_data_by_year(df, "year", year_range)
     data = data[data["publisher_by_doiprefix"].isin(top10_pub_list)]
     d = pd.DataFrame({'pub': data["publisher_by_doiprefix"].value_counts(
     ).index, 'count': data["publisher_by_doiprefix"].value_counts().values})
