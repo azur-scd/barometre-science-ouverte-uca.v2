@@ -26,6 +26,10 @@ def get_referentiel(publis_obs_date):
         return df
 df_structures = get_referentiel(publis_last_obs_date)
 
+row_title = html.H4(
+                    "Référentiel des structures UCA", className="p-3"
+                )
+
 row_main = html.Div(
     dvx.List(
         id="list", 
@@ -83,6 +87,6 @@ row_main = html.Div(
     ),
 )
 
-layout = [html.H3("Référentiel des structures UCA"),
-          html.Hr(className="my-2"),
+layout = [row_title,
+          #html.Hr(className="my-2"),
           row_main]

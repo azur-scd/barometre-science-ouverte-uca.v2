@@ -3,7 +3,7 @@ import pandas as pd
 import dash
 from dash import Dash, callback, html, dcc, dash_table, Input, Output, State, MATCH, ALL
 import dash_bootstrap_components as dbc
-from templates.ui_templates import get_slider_range, widget_card_header, widget_card_chart, widget_card_chart_no_callback, get_radio_buttons_chart_order
+from templates.ui_templates import get_slider_range, widget_card_chart, widget_card_chart_no_callback, get_radio_buttons
 from templates.header_templates import get_publis_row_widgets_header
 import helpers.functions as fn
 import plotly.express as px
@@ -11,7 +11,7 @@ import sqlalchemy as sqla
 import json
 import config
 
-dash.register_page(__name__, path='/dashboard-publications-diciplines')
+dash.register_page(__name__, path='/dashboard-publications-disciplines')
 
 # config params
 publis_last_obs_date = config.PUBLIS_LAST_OBS_DATE
@@ -81,6 +81,11 @@ fig_oa_rate_by_year_faceting_disc.for_each_annotation(
 
 row_widgets_header = get_publis_row_widgets_header(df)
 
+chart_order_options = [
+                    {"label": "Taux d'Open Access", "value": "oa"},
+                    {"label": "Nombre de publications", "value": "qte"},
+                ]
+
 row_widgets = html.Div(
     [
         dbc.Row(
@@ -102,7 +107,7 @@ row_widgets = html.Div(
         dbc.Row(
             [
                 dbc.Col(widget_card_chart("hosttype_by_disc", "Répartition des publications françaises par voie d'ouverture pour chaque discipline",
-                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_disc'], slider_range=get_slider_range('hosttype_by_disc', publis_period),  radio_buttons=get_radio_buttons_chart_order('hosttype_by_disc'), comment = widgets_with_comment_dict["hosttype-by-disc"]), width=6),
+                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_disc'], slider_range=get_slider_range('hosttype_by_disc', publis_period),  radio_buttons=get_radio_buttons('hosttype_by_disc', "Classer par :", chart_order_options), comment = widgets_with_comment_dict["hosttype-by-disc"]), width=6),
                 dbc.Col(widget_card_chart("hosttype_disc_scatter", "Positionnement des disciplines en fonction des voies privilégiées pour l'ouverture de leurs publications",
                         bsonat_iframe_src=widgets_with_iframe_dict['hosttype_disc_scatter'], slider_range=get_slider_range('hosttype_disc_scatter', publis_period), comment = widgets_with_comment_dict["hosttype-disc-scatter"]), width=6),
             ]
@@ -153,7 +158,7 @@ def update_disc_radar(year_range):
 @callback(
     Output('fig_hosttype_by_disc', 'figure'),
     [Input("hosttype_by_disc-year-range", "value"),
-    Input("hosttype_by_disc-radio-chart-order", "value")]
+    Input("hosttype_by_disc-radio-buttons", "value")]
 )
 def update_hosttype_rate_by_disc(year_range, chart_order):
     df = get_data()

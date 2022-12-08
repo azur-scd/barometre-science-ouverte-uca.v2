@@ -3,7 +3,7 @@ import pandas as pd
 import dash
 from dash import Dash, callback, html, dcc, dash_table, Input, Output, State, MATCH, ALL
 import dash_bootstrap_components as dbc
-from templates.ui_templates import get_slider_range, widget_card_header, widget_card_chart, get_radio_buttons_datatype
+from templates.ui_templates import get_slider_range, widget_card_chart, get_radio_buttons
 from templates.header_templates import get_publis_row_widgets_header
 import helpers.functions as fn
 import plotly.express as px
@@ -96,7 +96,8 @@ select_structure_section = dbc.Row([
     value="0"
 ),
 width=4)
-])
+],
+className="fst-italic fw-bold bg-opacity-25 p-2 m-1 bg-primary text-light border rounded-pill")
 
 compare_oa_form = dbc.Form(
     [dbc.Row(
@@ -137,11 +138,16 @@ compare_oa_form = dbc.Form(
     ],className="g-2")
 ])
 
+datatype_options = [
+                    {"label": "Valeur absolue", "value": "qte"},
+                    {"label": "Pourcentage", "value": "percent"},
+                ] 
+
 row_charts = html.Div(
     [   dbc.Row(
             [
                 dbc.Col([widget_card_chart("oa_rate","Taux d'accès ouvert global",slider_range=get_slider_range("oa-rate", publis_period), comment = widgets_with_comment_dict["oa-rate"])], width=4),
-                dbc.Col(widget_card_chart("oa_rate_by_year","Accès ouvert par année de publication",radio_buttons=get_radio_buttons_datatype("oa-rate"), comment = widgets_with_comment_dict["oa-rate-by-year"]), width=4),
+                dbc.Col(widget_card_chart("oa_rate_by_year","Accès ouvert par année de publication",radio_buttons=get_radio_buttons("oa-rate", "Type de données :", datatype_options), comment = widgets_with_comment_dict["oa-rate-by-year"]), width=4),
                 dbc.Col(widget_card_chart("oa_rate_by_obs_date","Taux d'accès ouvert des publications parues durant l'année précédente par année d'observation", bsonat_iframe_src=widgets_with_iframe_dict['oa_rate_by_obs_date'], comment = widgets_with_comment_dict["oa-rate-by-obs-date"]), width=4),
             ]
         ),
@@ -259,7 +265,7 @@ def update_oa_rate(publis_dataset, year_range):
 @callback(
     Output('fig_oa_rate_by_year', 'figure'),
     [Input("publis_dataset", "data"),
-    Input("oa-rate-radio-detail-datatype","value")],
+    Input("oa-rate-radio-buttons","value")],
 )
 def update_oa_rate_by_year(publis_dataset, radio_buttons):
     df = pd.read_json(publis_dataset)

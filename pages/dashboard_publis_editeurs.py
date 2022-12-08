@@ -3,7 +3,7 @@ import pandas as pd
 import dash
 from dash import Dash, callback, html, dcc, dash_table, Input, Output, State, MATCH, ALL
 import dash_bootstrap_components as dbc
-from templates.ui_templates import get_slider_range, widget_card_header, widget_card_chart, get_select_publisher, get_radio_buttons_chart_order
+from templates.ui_templates import get_slider_range, widget_card_chart, get_select_publisher, get_radio_buttons
 from templates.header_templates import get_publis_row_widgets_header
 import helpers.functions as fn
 import plotly.express as px
@@ -88,6 +88,11 @@ df = get_publis_dataset(publis_last_obs_date,ALL_SELECTED_PUBLIHERS)
 
 row_widgets_header = get_publis_row_widgets_header(df)
 
+chart_order_options = [
+                    {"label": "Taux d'Open Access", "value": "oa"},
+                    {"label": "Nombre de publications", "value": "qte"},
+                ]
+
 row_widgets = html.Div([
 
      dbc.Row(
@@ -95,7 +100,7 @@ row_widgets = html.Div([
                 dbc.Col(widget_card_chart("pub_oa_rate_by_obs_date", "Part des publications mises à disposition en accès ouvert par leur éditeur, par année d’observation, pour les publications parues durant l’année précédente",
                         bsonat_iframe_src=widgets_with_iframe_dict['pub_oa_rate_by_obs_date'], select_publisher=get_select_publisher('pub_oa_rate_by_obs_date', dict_publishers)), width=6),
                 dbc.Col(widget_card_chart("hosttype_by_pub", "Modalités d'ouverture des publications chez les éditeurs ou plateformes de publication les plus importants en volume (top 25)",
-                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_pub'], slider_range=get_slider_range('hosttype_by_pub', publis_period), radio_buttons=get_radio_buttons_chart_order('hosttype_by_pub')), width=6),
+                        bsonat_iframe_src=widgets_with_iframe_dict['hosttype_by_pub'], slider_range=get_slider_range('hosttype_by_pub', publis_period), radio_buttons=get_radio_buttons('hosttype_by_pub', "Classer par :", chart_order_options)), width=6),
             ]
         ),
         dbc.Row(
@@ -153,7 +158,7 @@ def update_oa_rate_by_obs_date(selected_publisher):
 @callback(
     Output('fig_hosttype_by_pub', 'figure'),
     [Input("hosttype_by_pub-year-range", "value"),
-    Input("hosttype_by_pub-radio-chart-order", "value")]
+    Input("hosttype_by_pub-radio-buttons", "value")]
 )
 def update_hosttype_rate_by_pub(year_range, chart_order):
     data = fn.get_filtered_data_by_year(df, "year", year_range)

@@ -4,8 +4,10 @@ URL_SUBPATH = '/barometre-science-ouverte-uca/'
 PUBLIS_PERIOD = [2016,2022]
 PUBLIS_OBS_DATES = ["20220829","20210914","20201130"]
 PUBLIS_LAST_OBS_DATE = "20220829"
+PUBLIS_LAST_OBS_DATE_TEXT = "28 août 2022"
 THESES_OBS_DATES = ["20221017","20220530"]
 THESES_LAST_OBS_DATE = "20221017"
+THESES_LAST_OBS_DATE_TEXT = "17 octobre 2022"
 THESES_PERIOD = [2013,2022]
 PLOTLY_TEMPLATE = "simple_white"
 COLORS = {'Accès fermé': 'rgb(38,40,63)', #publis
@@ -20,6 +22,8 @@ COLORS = {'Accès fermé': 'rgb(38,40,63)', #publis
           'Sciences, Technologies, Santé': 'rgb(56, 166, 165)',
           'Lettres, sciences Humaines et Sociales': 'rgb(237, 173, 8)',
           'Accès restreint': 'rgb(38,40,63)', # theses
-          'Accès libre': 'rgb(86, 215, 136)', #theses
+          'Accès libre': 'rgb(86, 215, 136)', #theses,
+          'Avec embargo': 'rgb(225, 101, 137)', # theses
+          'Sans embargo': 'rgb(25, 211, 243)', #theses
           }
 LINE_DASH_MAP = {'2022': 'solid', '2021': 'dot', '2020': 'dash'}

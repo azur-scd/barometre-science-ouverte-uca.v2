@@ -61,12 +61,12 @@ right_jumbotron = dbc.Col(
             ),
             html.P("Il se base sur les métadonnées descriptives de Thèses.fr exposées en Open Data sur data.gouv.fr par l'Abes"),
             dbc.Row([
-                dbc.Col(widget_card_header("nb_theses","Nombre de thèses", text="2 055"),width={"offset": 1, "size":5}),
-                dbc.Col(widget_card_header("theses_oa_rate_total","Taux d'ouverture", text="74,2 %"), width=5),
+                dbc.Col(widget_card_header("nb_theses","Nombre de thèses", text="2 107"),width={"offset": 1, "size":5}),
+                dbc.Col(widget_card_header("theses_oa_rate_total","Taux d'ouverture", text="64.7 %"), width=5),
                 ],
                 className="mt-5"),
             #html.Hr(className="my-2"),
-            html.P(dbc.Button("Coming soon...", color="secondary", outline=True,  href=f"{url_subpath}dashboard-theses"),className="lead text-center mt-5")
+            html.P(dbc.Button("Accéder", color="secondary", outline=True,  href=f"{url_subpath}dashboard-theses"),className="lead text-center mt-5")
         ],
         className="h-100 p-5 bg-light border rounded-3",
     ),

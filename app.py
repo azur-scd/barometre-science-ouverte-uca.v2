@@ -58,7 +58,7 @@ navbar = dbc.Navbar(
                             dbc.DropdownMenuItem("Baromètre général",
                                                  href=f"{url_subpath}dashboard-publications"),
                             dbc.DropdownMenuItem(
-                                "Disciplines", href=f"{url_subpath}dashboard-publications-diciplines"),
+                                "Disciplines", href=f"{url_subpath}dashboard-publications-disciplines"),
                             dbc.DropdownMenuItem("Editeurs", href=f"{url_subpath}dashboard-publications-editeurs"),
                             dbc.DropdownMenuItem(divider=True),
                             dbc.DropdownMenuItem(
@@ -74,11 +74,8 @@ navbar = dbc.Navbar(
                         children=[
                             dbc.DropdownMenuItem(
                                 "Baromètre général", href=f"{url_subpath}dashboard-theses"),
-                            dbc.DropdownMenuItem("Disciplines", href=f"{url_subpath}"),
-                            dbc.DropdownMenuItem(
-                                "Ecoles doctorales", href=f"{url_subpath}"),
                             dbc.DropdownMenuItem(divider=True),
-                            dbc.DropdownMenuItem("Données", href=f"{url_subpath}"),
+                            dbc.DropdownMenuItem("Données", href=f"{url_subpath}data-theses"),
                         ],
                         nav=True,
                         in_navbar=True,

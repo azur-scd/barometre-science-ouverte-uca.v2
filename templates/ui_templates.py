@@ -101,10 +101,10 @@ def widget_card_chart(id, title, bsonat_iframe_src=None, slider_range=None, radi
         dbc.CardBody(
             [
                 load_with_spinner(dcc.Graph(id=f"fig_{id}"))
-            ]
+            ],
         ),
         comment_div
-    ], color="light", outline=True)
+    ],color="light", outline=True)
     return card
 
 
@@ -166,55 +166,35 @@ def get_slider_range(div_id,period):
         period_marks[i] = str(i)
     # slider
     return html.Div(dbc.Row([
-        dbc.Col(dbc.Label("Filtrer par année de publication"),width=4),
+        dbc.Col(dbc.Label("Filtrer par année de publication", className="fst-bold"),width=4),
         dbc.Col(dcc.RangeSlider(period[0], period[1] - 1, 1, value=[
             period[0], period[1] - 1], marks=period_marks, id=f'{div_id}-year-range'), width=8)
     ],
-    className="fst-italic")
-    )
-    
-
-def get_radio_buttons_datatype(div_id):
-    return html.Div(
-        dbc.Row([
-            dbc.Col(dbc.Label("Type de données"), width=3),
-            dbc.Col(dbc.RadioItems(
-                options=[
-                    {"label": "Valeur absolue", "value": "qte"},
-                    {"label": "Pourcentage", "value": "percent"},
-                ],
-                inline=True,
-                value="qte",
-                id=f"{div_id}-radio-detail-datatype"
-            ), width=9)
-        ],
-        className="fst-italic")
+    className="fst-italic fw-bold bg-opacity-25 p-2 m-1 bg-primary text-light border rounded-pill")
     )
 
-def get_radio_buttons_chart_order(div_id):
+def get_radio_buttons(div_id,label,options):
     return html.Div(
         dbc.Row([
-            dbc.Col(dbc.Label("Ordonner par :"), width=3),
+            dbc.Col(dbc.Label(f"{label}"), width=3),
             dbc.Col(dbc.RadioItems(
-                options=[
-                    {"label": "Taux d'Open Access", "value": "oa"},
-                    {"label": "Nombre de publications", "value": "qte"},
-                ],
+                options=options,
                 inline=True,
-                value="qte",
-                id=f"{div_id}-radio-chart-order"
+                value=options[0]["value"],
+                id=f"{div_id}-radio-buttons"
             ), width=9)
         ],
-        className="fst-italic")
+        className="fst-italic fw-bold bg-opacity-25 p-2 m-1 bg-primary text-light border rounded-pill")
     )
 
 def get_select_publisher(div_id,dict_publishers):
-    return dcc.Dropdown(
+    return html.Div(dcc.Dropdown(
        id=f"{div_id}-selected_publisher",
        options=dict_publishers,
        multi=False,
        value=dict_publishers[0]['value']
-    )   
+    ),
+     className="fst-italic fw-bold bg-opacity-25 p-2 m-1 bg-primary text-light border rounded-pill") 
 
 # [Unused]
 # example : dbc.Col(widget_card_chart("oa_and_hosttype","Répartition des publications par voie d'ouverture",bsonat_iframe_src=widgets_with_iframe_dict['oa_and_hosttype'], radio_buttons=get_radio_buttons_date_obs_vs_all_dataset("oa-and-hosttype", publis_last_obs_date[:4])), width=6),
@@ -231,7 +211,7 @@ def get_radio_buttons_date_obs_vs_all_dataset(div_id, date_obs):
             value="all",
             id=f"{div_id}-radio-date-obs-vs-all-dataset"
         ), width=10)],
-        className="fst-italic")
+        className="fst-italic fw-bold bg-opacity-25 p-2 m-1 bg-primary text-light border rounded-pill")
     )
 
 # [Unused]
