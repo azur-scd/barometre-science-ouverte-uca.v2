@@ -11,6 +11,7 @@ import sqlalchemy as sqla
 import dash_dvx as dvx
 import json
 import config
+import plotly.io as pio # for charts htm lexport
 
 dash.register_page(__name__, path='/dashboard-publications')
 
@@ -21,7 +22,6 @@ publis_obs_dates = config.PUBLIS_OBS_DATES
 publis_period = config.PUBLIS_PERIOD
 line_dash_map = config.LINE_DASH_MAP
 plotly_template = config.PLOTLY_TEMPLATE
-
 
 ## For loop of callbacks on the bso modal url
 widgets_with_iframe_dict = {"oa_rate_by_obs_date":"https://barometredelascienceouverte.esr.gouv.fr/integration/fr/publi.general.dynamique-ouverture.chart-taux-ouverture",
@@ -259,6 +259,7 @@ def update_oa_rate(publis_dataset, year_range):
     df = pd.read_json(publis_dataset)
     data = fn.get_filtered_data_by_year(df,"year",year_range)
     fig = px.pie(data, names='is_oa_normalized', hole=0.7, color="is_oa_normalized", color_discrete_map= colors)
+    #pio.write_html(fig, file="charts_html_files/publis/oa_rate.html", auto_open=False)
     return fig
 
 ## Callback set of publis data -> vertical barchart oa rate by year
@@ -290,6 +291,7 @@ def update_oa_rate_by_year(publis_dataset, radio_buttons):
     x=1
     ),
     margin=dict(l=10, r=10, t=10, b=10))
+    #pio.write_html(fig, file="charts_html_files/publis/oa_rate_by_publication_year.html", auto_open=False)
     return fig
 
 ## Callback set of publis data -> horizontal barchart oa rate by observation date
@@ -342,7 +344,12 @@ def update_hosttype_rate_by_year(publis_dataset):
     xanchor="right",
     x=1
     ),
-    margin=dict(l=10, r=10, t=10, b=10))
+    margin=dict(l=10, r=10, t=10, b=10),
+    hoverlabel=dict(
+        bgcolor="white",
+        font_size=16,
+        font_family="Rockwell"
+    ))
     return fig
 
 ## Callback selected structure -> dict of crosstab dataset dict -> lines chart of oa rate by year and observation date

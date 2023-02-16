@@ -16,6 +16,7 @@ db/**
 ###################
 .devcontainer
 .vscode
+charts_html_files/**
 
 # Ignore batch files
 ###################
