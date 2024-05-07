@@ -24,5 +24,5 @@ pytz==2022.6
 six==1.16.0
 SQLAlchemy==1.4.44
 tenacity==8.1.0
-Werkzeug==2.2.3
+Werkzeug==3.0.3
 zipp==3.10.0
